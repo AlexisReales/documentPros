@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de PDF</title>
+</head>
+<body>
+    <h1>Enviar Arquivo PDF</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="application/pdf, image/*" required />
+        <button type="submit">Enviar</button>
+    </form>
+
+    <div id="result"></div> <!-- Div para exibir o resultado -->
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            const fileInput = document.getElementById('fileInput');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]); // Adiciona o arquivo ao FormData
+
+            try {
+                const response = await fetch('/api/process', { // Use a rota relativa
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const resultData = await response.json(); // Obtém os dados retornados pela IA
+                    console.log("Dados retornados pela IA:", resultData.data); // Exibe no console
+                    document.getElementById('result').innerText = JSON.stringify(resultData.data, null, 2); // Exibe na página
+                } else {
+                    const errorData = await response.json();
+                    alert(`Erro: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Erro ao enviar o arquivo:', error);
+                alert('Erro ao enviar o arquivo. Verifique o console para mais detalhes.');
+            }
+        });
+    </script>
+</body>
+</html>
+
