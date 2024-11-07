@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import multer from 'multer';
 import { extractDataFromPDF, extractDataFromImage } from '../../../utils/extractData';
-import xlsx from "xlsx";
+import cors, { runMiddleware } from '../cors'; // Importando o middleware CORS
 
 const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAbIeH6ozUKv_GemlZSKmJsITLq8g8FHBQ';
 
@@ -18,6 +18,8 @@ interface CustomRequest extends NextApiRequest {
 }
 
 const handler = async (req: CustomRequest, res: NextApiResponse) => {
+  await runMiddleware(req, res, cors); // Aplica o middleware CORS
+
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
@@ -83,43 +85,11 @@ const handler = async (req: CustomRequest, res: NextApiResponse) => {
     const googleData = await response.json();
     
     // ** Adicionando log para verificar os dados retornados pela IA **
-    // console.log("Dados retornados pela IA:", googleData.candidates[0].content);
     console.log("Dados retornados pela IA:", googleData);
 
     // Extrai o texto da resposta da IA
     const aiText = googleData.candidates[0].content.parts[0].text;
     console.log("Texto retornado pela IA:", aiText); // Log do texto retornado pela IA
-
-    // let worksheetData;
-    // try {
-    //   worksheetData = JSON.parse(aiText);
-    // } catch {
-    //   worksheetData = aiText.split('\n').map((line: any) => {
-    //     return line.split(','); // Modificado para usar vírgula como delimitador
-    //   });
-    // }
-
-    // // Ajuste para garantir que os dados sejam formatados corretamente
-    // const formattedData = worksheetData.map((row: any) => {
-    //   return { dados: row.join(', ') }; // Juntar todos os dados em uma única string
-    // });
-
-    // console.log("Dados formatados para Excel:", formattedData); // Log dos dados formatados
-
-    // // Salva os dados em um arquivo Excel em memória
-    // const wb = xlsx.utils.book_new();
-    // const ws = xlsx.utils.json_to_sheet(formattedData);
-    // xlsx.utils.book_append_sheet(wb, ws, "Dados Extraídos");
-    
-    // // Cria um buffer do arquivo Excel
-    // const buffer = xlsx.write(wb, { bookType: 'xlsx', type: 'buffer' });
-
-    // // Define os cabeçalhos para download
-    // res.setHeader('Content-Disposition', 'attachment; filename="dados_extraidos.xlsx"');
-    // res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    
-    // // Envia o arquivo Excel como resposta
-    // res.send(buffer);
 
     // Aqui, em vez de salvar em Excel, retornamos o JSON diretamente
     res.status(200).json({ data: aiText }); // Retorna o resultado em formato JSON
