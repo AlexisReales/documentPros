@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
+    "cors": "^2.8.5",
     "from": "^0.1.7",
     "googleapis": "^144.0.0",
     "import": "^0.0.6",
